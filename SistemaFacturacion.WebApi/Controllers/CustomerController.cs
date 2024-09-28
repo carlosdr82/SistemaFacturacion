@@ -9,6 +9,7 @@ namespace SistemaFacturacion.WebApi.Controllers
     [Route("api/[Controller]")]
     public class CustomerController : ControllerBase
     {
+
         private readonly IDbConnection _connection;
         public CustomerController(IConfiguration configuration)
         {
@@ -18,19 +19,19 @@ namespace SistemaFacturacion.WebApi.Controllers
         [HttpGet("GetAll")]
         public IActionResult GetAll()
         {
-            var customer = _connection.Query<Customer>("SELECT * FORM Customers");
+            var customer = _connection.Query<Customer>("SELECT * FROM Customers");
             return Ok(customer);
         }
 
         [HttpGet("GetAllAsync")]
         public async Task<IActionResult> GetAllAsync()
         {
-            var customer = await _connection.QueryAsync<Customer>("SELECT * FORM Customers");
+            var customer = await _connection.QueryAsync<Customer>("SELECT * FROM Customers");
             return Ok(customer);
         }
 
-        [HttpGet("ObtenerPorIdAsync{Id}")]
-        public async Task<IActionResult> ObtenerPorIdAsync(int id)
+        [HttpGet("{id}", Name = "GetById")]
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
             var parametros = new
             {
@@ -47,11 +48,51 @@ namespace SistemaFacturacion.WebApi.Controllers
             return Ok(customer);
         }
 
-        [HttpGet("BuscarClientePorNombreAsync/{nombre}")]
-        public async Task<IActionResult> BuscarClientePorNombreAsync(string nombre)
+        [HttpGet("SearhClientByNameAsync/{nombre}")]
+        public async Task<IActionResult> SearhClientByNameAsync(string nombre)
         {
             var customer = await _connection.QueryAsync<Customer>("SELECT * FROM Customers WHERE Name LIKE @Nombre", new { Nombre = $"%{nombre}%" });
             return Ok(customer);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Customer customer)
+        {
+            var sql = @"INSERT INTO Customers (Name)
+                VALUES (@Name);
+                SELECT CAST(SCOPE_IDENTITY() as int)";
+
+            var id = await _connection.QuerySingleAsync<int>(sql, customer);
+            customer.Id = id;
+
+            return CreatedAtAction("GetById", new { id = customer.Id }, customer);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, Customer customer)
+        {
+            customer.Id = id;
+            var sql = @"UPDATE Customers
+                    SET Name= @Name
+                    WHERE Id = @Id";
+
+            var affected = await _connection.ExecuteAsync(sql, customer);
+
+            if (affected == 0)
+                return NotFound();
+
+            return Ok(customer);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var affected = await _connection.ExecuteAsync("DELETE FROM Customers WHERE Id = @Id", new { Id = id });
+
+            if (affected == 0)
+                return NotFound();
+
+            return NoContent();
         }
     }
 }
