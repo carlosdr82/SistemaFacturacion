@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SistemaFacturacion.WebApi.Model;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace SistemaFacturacion.WebApi.Controllers
 {

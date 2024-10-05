@@ -1,0 +1,29 @@
+﻿@model List<InvoiceListItemDto>
+
+<h2>Invoices</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Invoice</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Invoice Number</th>
+            <th>Date</th>
+            <th>Customer</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var invoice in Model)
+        {
+            <tr>
+                <td>@invoice.Id</td>
+                <td>@invoice.Date.ToShortDateString()</td>
+                <td>@invoice.CustomerName</td>
+                <td>@invoice.Total.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
